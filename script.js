@@ -1,4 +1,4 @@
-// Word length distribution (based on your data)
+// Word length distribution
 const wordLengthDistribution = [
     { length: 2, weight: 15.26 },
     { length: 3, weight: 15.12 },
@@ -35,26 +35,11 @@ const wordLengthDistribution = [
     { length: 34, weight: 0.00000008 },
     { length: 35, weight: 0.0000000007 },
     { length: 36, weight: 0.00000000009 },
-    { length: 45, weight: 0.00000000094 },
-    { length: 51, weight: 0.0000000000000009 },
-    { length: 52, weight: 0.0000000000000003 },
+    { length: 45, weight: 0.00000000094 }
 ];
 
-// Function to select a random word length based on frequency
-function getRandomLength() {
-    const totalWeight = wordLengthDistribution.reduce((sum, item) => sum + item.weight, 0);
-    let randomNum = Math.random() * totalWeight;
-
-    for (const item of wordLengthDistribution) {
-        if (randomNum < item.weight) {
-            return item.length;
-        }
-        randomNum -= item.weight;
-    }
-}
-
-// Function to generate a random word of selected length
-async function generateRandomWord() {
+// Function to generate a random word of selected length and return its rarity
+async function generateRandomWordWithRarity() {
     const response = await fetch('word-list-raw.txt');
     const text = await response.text();
     const words = text.split('\n').filter(word => word.trim().length > 0);
@@ -65,15 +50,21 @@ async function generateRandomWord() {
 
     // Pick a random word of the selected length
     const randomIndex = Math.floor(Math.random() * filteredWords.length);
-    return filteredWords[randomIndex];
+    const randomWord = filteredWords[randomIndex];
+
+    // Find the rarity of the selected length
+    const rarityInfo = wordLengthDistribution.find(item => item.length === randomLength);
+    const rarity = rarityInfo ? rarityInfo.weight : 'Unknown';
+
+    return { word: randomWord, rarity: rarity };
 }
 
-// This function updates the displayed word
+// This function updates the displayed word with its rarity
 async function updateWordDisplay() {
-    const randomWord = await generateRandomWord();
-    document.getElementById('randomWordDisplay').innerText = randomWord;
+    const { word, rarity } = await generateRandomWordWithRarity();
+    document.getElementById('randomWordDisplay').innerText = `Word: ${word}, Rarity: ${rarity}%`;
 }
 
 // Attach the event listener to the button
 document.getElementById('generateWordButton').addEventListener('click', updateWordDisplay);
-      
+                                       
