@@ -1,4 +1,4 @@
-// Word length distribution
+// Word length distribution (based on your data)
 const wordLengthDistribution = [
     { length: 2, weight: 15.26 },
     { length: 3, weight: 15.12 },
@@ -38,6 +38,24 @@ const wordLengthDistribution = [
     { length: 45, weight: 0.00000000094 }
 ];
 
+// Function to select a random word length based on frequency
+function getRandomLength() {
+    const totalWeight = wordLengthDistribution.reduce((sum, item) => sum + item.weight, 0);
+    let randomNum = Math.random() * totalWeight;
+
+    console.log(`Total Weight: ${totalWeight}`);
+    console.log(`Initial Random Number: ${randomNum}`);
+
+    for (const item of wordLengthDistribution) {
+        if (randomNum < item.weight) {
+            console.log(`Selected Length: ${item.length}, Rarity: ${item.weight}%`);
+            return item.length;
+        }
+        randomNum -= item.weight;
+        console.log(`Random Number after deduction: ${randomNum}`);
+    }
+}
+
 // Function to generate a random word of selected length and return its rarity
 async function generateRandomWordWithRarity() {
     const response = await fetch('word-list-raw.txt');
@@ -48,6 +66,12 @@ async function generateRandomWordWithRarity() {
     const randomLength = getRandomLength();
     const filteredWords = words.filter(word => word.length === randomLength);
 
+    console.log(`Filtered words of length ${randomLength}:`, filteredWords);
+
+    if (filteredWords.length === 0) {
+        return { word: "No word found", rarity: "N/A" };
+    }
+
     // Pick a random word of the selected length
     const randomIndex = Math.floor(Math.random() * filteredWords.length);
     const randomWord = filteredWords[randomIndex];
@@ -55,6 +79,8 @@ async function generateRandomWordWithRarity() {
     // Find the rarity of the selected length
     const rarityInfo = wordLengthDistribution.find(item => item.length === randomLength);
     const rarity = rarityInfo ? rarityInfo.weight : 'Unknown';
+
+    console.log(`Generated Word: ${randomWord}, Rarity: ${rarity}%`);
 
     return { word: randomWord, rarity: rarity };
 }
@@ -67,4 +93,4 @@ async function updateWordDisplay() {
 
 // Attach the event listener to the button
 document.getElementById('generateWordButton').addEventListener('click', updateWordDisplay);
-                                       
+    
